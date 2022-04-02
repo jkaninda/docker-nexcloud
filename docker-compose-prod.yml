@@ -1,0 +1,52 @@
+version: "3.7"
+
+services:
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    hostname: nextcloud.example.com
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - nextcloud:/var/www/html
+      - nextcloud-data:/var/www/html/data
+
+  mysql:
+    image: mysql
+    container_name: nextcloud-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - nextcloud-mysql:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: nextcloud-phpmyadmin
+    restart: unless-stopped
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 300M
+
+    #ports:
+      #- 8995:80
+      
+volumes:
+  nextcloud:
+  nextcloud-mysql:
+  nextcloud-data:
